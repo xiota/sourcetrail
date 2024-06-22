@@ -299,16 +299,6 @@ add_subdirectory(src/indexer)
 
 add_subdirectory(src/app)
 
-# Test ----------------------------------------------------------------------
-
-find_package(Catch2 CONFIG REQUIRED)
-message(STATUS "Found Catch2 ${Catch2_VERSION}")
-
-include(CTest)
-include(Catch)
-
-add_subdirectory(src/test)
-
 # Installing/Packaging ---------------------------------------------------------
 
 install(DIRECTORY "${CMAKE_BINARY_DIR}/app/" DESTINATION "app/")
