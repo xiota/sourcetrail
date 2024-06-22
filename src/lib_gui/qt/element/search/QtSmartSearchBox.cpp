@@ -551,7 +551,7 @@ void QtSmartSearchBox::mouseReleaseEvent(QMouseEvent* event)
 
 	m_mousePressed = false;
 
-	if (abs(event->x() - m_mouseX) > 5)
+	if (std::abs(event->x() - m_mouseX) > 5)
 	{
 		return;
 	}
@@ -561,7 +561,7 @@ void QtSmartSearchBox::mouseReleaseEvent(QMouseEvent* event)
 	for (size_t i = 0; i < m_elements.size(); i++)
 	{
 		int dist = m_elements[i]->x() + m_elements[i]->width() - event->x();
-		if (abs(dist) < abs(minDist))
+		if (std::abs(dist) < std::abs(minDist))
 		{
 			pos = static_cast<int>(i) + 1;
 			minDist = dist;
