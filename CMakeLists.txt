@@ -218,12 +218,42 @@ if (BUILD_CXX_LANGUAGE_PACKAGE)
 	target_include_directories(External_lib_clang SYSTEM
 		INTERFACE
 			${LLVM_INCLUDE_DIRS}
+			${CLANG_INCLUDE_DIRS}
 	)
-	llvm_map_components_to_libnames(REQ_LLVM_LIBS
-		${LLVM_TARGETS_TO_BUILD} support core libdriver passes option
-	)
-	target_link_libraries(External_lib_clang
-		INTERFACE
+
+	if (WIN32)
+		target_compile_definitions(External_lib_clang
+			PRIVATE
+				_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS # Due to Clang
+		)
+		target_link_libraries(External_lib_clang
+			PUBLIC
+				version
+		)
+	endif()
+
+	if(LLVM_LINK_LLVM_DYLIB)
+		set(REQ_LLVM_LIBS LLVM)
+	else()
+		llvm_map_components_to_libnames(REQ_LLVM_LIBS
+			support core libdriver passes option
+		)
+		foreach(LLVM_TARGET ${LLVM_TARGETS_TO_BUILD})
+			get_property(lib_deps GLOBAL PROPERTY "LLVMBUILD_LIB_DEPS_LLVM${LLVM_TARGET}CodeGen")
+			list(APPEND REQ_LLVM_LIBS "LLVM${LLVM_TARGET}CodeGen")
+			list(APPEND REQ_LLVM_LIBS "${lib_deps}")
+			get_property(lib_deps GLOBAL PROPERTY "LLVMBUILD_LIB_DEPS_LLVM${LLVM_TARGET}AsmParser")
+			if (NOT "${lib_deps}" STREQUAL "")
+				list(APPEND REQ_LLVM_LIBS "LLVM${LLVM_TARGET}AsmParser")
+				list(APPEND REQ_LLVM_LIBS "${lib_deps}")
+			endif()
+		endforeach()
+	endif()
+
+	if(LLVM_LINK_LLVM_DYLIB)  # Should be CLANG_LINK_CLANG_DYLIB in future LLVM release
+		set(CLANG_LIBRARIES clang-cpp)
+	else()
+		set(CLANG_LIBRARIES
 			clangASTMatchers
 			clangFrontend
 			clangSerialization
@@ -240,7 +270,14 @@ if (BUILD_CXX_LANGUAGE_PACKAGE)
 			clangAST
 			clangLex
 			clangBasic
+		)
+	endif()
 
+	target_link_libraries(External_lib_clang
+		INTERFACE
+			Sourcetrail_lib_utility
+			Sourcetrail_lib
+			${CLANG_LIBRARIES}
 			${REQ_LLVM_LIBS}
 	)
 
