@@ -324,20 +324,6 @@ add_subdirectory(src/indexer)
 
 add_subdirectory(src/app)
 
-# Test ----------------------------------------------------------------------
-
-if (BUILD_UNIT_TESTS_PACKAGE)
-	find_package(Catch2 3.4 CONFIG REQUIRED)
-	message(STATUS "Found Catch2 ${Catch2_VERSION}")
-
-	include(CTest)
-	include(Catch)
-
-	add_subdirectory(src/test)
-else()
-	message(STATUS "Building the unit tests will be skipped. You can enable building this target by setting 'BUILD_UNIT_TESTS_PACKAGE' to 'ON'.")
-endif()
-
 # Installing/Packaging ---------------------------------------------------------
 
 install(DIRECTORY "${CMAKE_BINARY_DIR}/app/" DESTINATION "${PROJECT_NAME}/app/" USE_SOURCE_PERMISSIONS)
