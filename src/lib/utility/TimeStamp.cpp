@@ -112,12 +112,12 @@ std::string TimeStamp::dayOfWeekShort() const
 
 size_t TimeStamp::deltaMS(const TimeStamp& other) const
 {
-	return static_cast<size_t>(abs((m_time - other.m_time).total_milliseconds()));
+	return static_cast<size_t>(std::abs((m_time - other.m_time).total_milliseconds()));
 }
 
 size_t TimeStamp::deltaS(const TimeStamp& other) const
 {
-	return static_cast<size_t>(abs((m_time - other.m_time).total_seconds()));
+	return static_cast<size_t>(std::abs((m_time - other.m_time).total_seconds()));
 }
 
 bool TimeStamp::isSameDay(const TimeStamp& other) const
@@ -130,11 +130,11 @@ bool TimeStamp::isSameDay(const TimeStamp& other) const
 size_t TimeStamp::deltaDays(const TimeStamp& other) const
 {
 	boost::gregorian::date_duration deltaDate = m_time.date() - other.m_time.date();
-	return abs(deltaDate.days());
+	return std::abs(deltaDate.days());
 }
 
 size_t TimeStamp::deltaHours(const TimeStamp& other) const
 {
 	boost::posix_time::time_duration delta = m_time - other.m_time;
-	return static_cast<size_t>(abs(delta.total_seconds() / 3600));
+	return static_cast<size_t>(std::abs(delta.total_seconds() / 3600));
 }

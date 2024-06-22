@@ -62,7 +62,7 @@ void QtCodeNavigable::ensureWidgetVisibleAnimated(
 
 	case CodeScrollParams::Target::CENTER:
 		value = focusRect.center().y() - visibleRect.center().y();
-		if (abs(value) < 50)
+		if (std::abs(value) < 50)
 		{
 			value = 0;
 		}
