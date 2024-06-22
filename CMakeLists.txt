@@ -256,13 +256,10 @@ if (BUILD_CXX_LANGUAGE_PACKAGE)
 	add_library(Sourcetrail_lib_cxx)
 	add_subdirectory(src/lib_cxx)
 
-	target_compile_definitions(Sourcetrail_lib_cxx
-		PUBLIC
-			${LLVM_DEFINITIONS}
-	)
 	target_include_directories(Sourcetrail_lib_cxx SYSTEM
 		PUBLIC
 			${LLVM_INCLUDE_DIRS}
+			${CLANG_INCLUDE_DIRS}
 	)
 
 	if (WIN32)
@@ -272,15 +269,28 @@ if (BUILD_CXX_LANGUAGE_PACKAGE)
 		)
 	endif()
 
-	llvm_map_components_to_libnames(REQ_LLVM_LIBS
-		${LLVM_TARGETS_TO_BUILD} support core libdriver passes option
-	)
-	target_link_libraries(Sourcetrail_lib_cxx
-		PUBLIC
-			Sourcetrail_lib_utility
-			Sourcetrail_lib
-			External_lib_cxx
+	if(LLVM_LINK_LLVM_DYLIB)
+		set(REQ_LLVM_LIBS LLVM)
+	else()
+		llvm_map_components_to_libnames(REQ_LLVM_LIBS
+			support core libdriver passes option
+		)
+		foreach(LLVM_TARGET ${LLVM_TARGETS_TO_BUILD})
+			get_property(lib_deps GLOBAL PROPERTY "LLVMBUILD_LIB_DEPS_LLVM${LLVM_TARGET}CodeGen")
+			list(APPEND REQ_LLVM_LIBS "LLVM${LLVM_TARGET}CodeGen")
+			list(APPEND REQ_LLVM_LIBS "${lib_deps}")
+			get_property(lib_deps GLOBAL PROPERTY "LLVMBUILD_LIB_DEPS_LLVM${LLVM_TARGET}AsmParser")
+			if (NOT "${lib_deps}" STREQUAL "")
+				list(APPEND REQ_LLVM_LIBS "LLVM${LLVM_TARGET}AsmParser")
+				list(APPEND REQ_LLVM_LIBS "${lib_deps}")
+			endif()
+		endforeach()
+	endif()
 
+	if(LLVM_LINK_LLVM_DYLIB)  # Should be CLANG_LINK_CLANG_DYLIB in future LLVM release
+		set(CLANG_LIBRARIES clang-cpp)
+	else()
+		set(CLANG_LIBRARIES
 			clangASTMatchers
 			clangFrontend
 			clangSerialization
@@ -297,9 +307,19 @@ if (BUILD_CXX_LANGUAGE_PACKAGE)
 			clangAST
 			clangLex
 			clangBasic
+		)
+	endif()
 
+	target_link_libraries(Sourcetrail_lib_cxx
+		PUBLIC
+			Sourcetrail_lib_utility
+			Sourcetrail_lib
+			External_lib_cxx
+			${CLANG_LIBRARIES}
 			${REQ_LLVM_LIBS}
 	)
+
+	set(CMAKE_CXX_STANDARD ${CAPTURED_CMAKE_CXX_STANDARD})
 else()
 	message(STATUS "Building the Cxx indexer will be skipped. You can enable building this target by setting 'BUILD_CXX_LANGUAGE_PACKAGE' to 'ON'.")
 endif()
