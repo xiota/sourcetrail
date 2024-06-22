@@ -220,7 +220,7 @@ void QtMainWindow::overrideView(View* view)
 	QDockWidget* dock = nullptr;
 	for (const DockWidget& dockWidget: m_dockWidgets)
 	{
-		if (dockWidget.widget->windowTitle() == name)
+		if (dockWidget.widget->windowTitle().contains(name))
 		{
 			dock = dockWidget.widget;
 			break;
